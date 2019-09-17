@@ -12,6 +12,7 @@ import Menu from './menu';
 import PlayerManager from './playerManager';
 import QuestionManager from './questionManager';
 import createRoundedButton from './roundedButton';
+import ScoreScreen from './scoreScreen';
 import Screen from './screen';
 import SharedAssets from './sharedAssets';
 import { Category, Podium, Question } from './types';
@@ -43,6 +44,7 @@ export default class AltQuiz {
 	private answerLocked = 0;
 	private scoresOnScreen = false;
 	public assets: MRE.AssetContainer = new MRE.AssetContainer(this.context);
+	private soundPlayer: MRE.Actor;
 
 	public constructor(public context: MRE.Context, public params: MRE.ParameterSet, public baseUrl: string) {
 		this.colors = new ColorMaterials(context);
@@ -93,6 +95,7 @@ export default class AltQuiz {
 		let hostScreen: MRE.Actor;
 
 		app.scene = MRE.Actor.CreateEmpty(app.context, {actor: {name: 'scene'}});
+		app.soundPlayer = MRE.Actor.CreateEmpty(app.context, {actor: {name: 'sound', parentId: app.scene.id}});
 
 		await this.sharedAssets.load(this.context, this.baseUrl);
 
@@ -211,11 +214,11 @@ export default class AltQuiz {
 				let clickTime = (Math.random() * 45) + 5;
 				let count = 0;
 				const tick = async () => {
-					playSound('click');
+					app.playSound('click');
 					roundBeginText2.text.contents = catList[count].name;
 					// console.log(count, clickTime);
 					if (clickTime > 650) {
-						playSound('correct');
+						app.playSound('correct');
 						console.log(catList[count]);
 						const sql = pgescape(`SELECT * FROM questionsTest WHERE categoryId = ${catList[count].id} AND difficulty = %L ORDER BY RANDOM() LIMIT ${questions}`, diff);
 						console.log(sql);
@@ -239,7 +242,7 @@ export default class AltQuiz {
 			function time(count: number, next: string) {
 				if (next === 'reveal') {
 					setTimeout(() => {
-						playSound('ticktock');
+						app.playSound('ticktock');
 					}, (count - 3) * 1000);
 				}
 				timeLeft = count;
@@ -271,7 +274,7 @@ export default class AltQuiz {
 							time(0, 'next');
 						} else if (next === 'reveal') {
 							revealAnswer();
-							playSound('buzz');
+							app.playSound('buzz');
 							if (currentQuestion !== numOfQs - 1) {
 								time(5, 'next');
 							} else {
@@ -353,10 +356,14 @@ export default class AltQuiz {
 											endButton.findChildrenByName('label', false)[0].text.contents = 'Back to Menu';
 											endClicked = true;
 										} else {
+											for (const u of app.playerManager.connectedUsers) {
+												u.groups.delete('joined');
+												u.groups.add('notJoined');
+											}
 											app.playerManager.playerList = [];
 											app.scene.destroy();
 											app.scene = MRE.Actor.CreateEmpty(app.context, {actor: {name: 'scene'}});
-											soundPlayer = MRE.Actor.CreateEmpty(app.context, {actor: {name: 'sound', parentId: app.scene.id}});
+											app.soundPlayer = MRE.Actor.CreateEmpty(app.context, {actor: {name: 'sound', parentId: app.scene.id}});
 											app.screen = new Screen(app, app.scene);
 											const menu = new Menu(app, () => startClassic(), () => startNew());
 										}
@@ -828,7 +835,7 @@ export default class AltQuiz {
 						app.podiumList[x].model.findChildrenByName('panels', true)[0].appearance.material = colors.grey;
 					}
 				}
-				playSound('buzz');
+				app.playSound('buzz');
 				moveCamera(num, app.camera);
 				pod.spotLight.light.color = new MRE.Color3(.3, .3, .3);
 				pod.spotLight.light.enabled = true;
@@ -1132,7 +1139,7 @@ export default class AltQuiz {
 						resetGame();
 						app.scene.destroy();
 						app.scene = MRE.Actor.CreateEmpty(app.context, {actor: {name: 'scene'}});
-						soundPlayer = MRE.Actor.CreateEmpty(app.context, {actor: {name: 'sound', parentId: app.scene.id}});
+						app.soundPlayer = MRE.Actor.CreateEmpty(app.context, {actor: {name: 'sound', parentId: app.scene.id}});
 						const menu = new Menu(app, () => startClassic().catch(), () => startNew().catch());
 					}
 				});
@@ -1539,7 +1546,7 @@ export default class AltQuiz {
 								app.podiumList[app.podiumPressed].score.text.contents = app.podiumList[app.podiumPressed].scoreVal.toString();
 								setStripes(app.podiumPressed, correct ? 'green' : 'red');
 								console.log(correct, app.podiumList[app.podiumPressed]);
-								playSound(correct ? 'correct' : 'wrong');
+								app.playSound(correct ? 'correct' : 'wrong');
 								app.podiumList[app.podiumPressed].spotLight.light.color = correct ? MRE.Color3.Green() : MRE.Color3.Red();
 							}
 							for (let i = 0; i < 5; i++) {
@@ -2058,7 +2065,7 @@ export default class AltQuiz {
 				/* for (const p of app.playerList) {
 					p.icon.appearance.material = colors.white;
 				} */
-				return newScoreScreen();
+				return new ScoreScreen(app);
 			}
 		}
 		function hideScores() {
@@ -2106,94 +2113,6 @@ export default class AltQuiz {
 					pod.screen.findChildrenByName('screen', true)[0].transform.local.scale.setAll(1);
 				}
 			}
-		}
-		function newScoreScreen() {
-			let highScore = 1;
-			for (const p of app.playerList) {
-				// p.icon.appearance.enabled = false;
-				// p.icon.findChildrenByName('iconLabel', false)[0].text.enabled = false;
-				if (p.score > highScore) {
-					highScore = p.score;
-				}
-			}
-
-			const mesh = new MRE.AssetContainer(app.context).createBoxMesh('scoreBar', 1, 0.04, 0.001);
-			const scoreContainer = MRE.Actor.Create(app.context, {
-				actor: {
-					name: 'scoreContainer',
-					parentId: app.scene.id,
-					transform: { local: { position: { x: -1.8, y: 1.32, z: -0.001 } } }
-				}
-			});
-			const containerWidth = 3.6;
-			const containerHeight = 1.62;
-
-			for (let i = 0; i < app.playerList.length; i++) {
-				const p = app.playerList[i];
-				const scoreVal = p.score > 0 ? p.score : 1;
-				const label = MRE.Actor.CreateEmpty(app.context, {
-					actor: {
-						parentId: scoreContainer.id,
-						name: 'scoreText',
-						transform: { local: { position: {
-							x: (i % 2) * containerWidth / 2,
-							y: containerHeight - Math.floor(i / 2) * (containerHeight / 10)
-						} } },
-						text: {
-							contents: p.name,
-							height: 0.075,
-							anchor: MRE.TextAnchorLocation.TopLeft,
-							// color: p.color
-						}
-					}
-				});
-
-				const bar = MRE.Actor.Create(app.context, {
-					actor: {
-						parentId: label.id,
-						name: 'scoreBar',
-						transform: { local: {
-							position: { y: -0.13 },
-							scale: { x: 0 }
-						}},
-						appearance: {
-							meshId: mesh.id,
-							// materialId: p.icon.findChildrenByName('iconInner', true)[0].appearance.materialId
-						}
-					}
-				});
-				const maxBarLength = containerWidth / 2 - 0.1;
-				bar.animateTo({transform: {local: {
-					position: {x: bar.transform.local.position.x + (maxBarLength * (scoreVal / highScore)) / 2 },
-					scale: {x: maxBarLength * (scoreVal / highScore)}
-				}}}, 3 * (scoreVal / highScore), MRE.AnimationEaseCurves.Linear);
-
-				setTimeout(() => {
-					label.text.contents += `    ${p.score}`;
-					playSound(scoreVal === highScore ? 'correct' : 'buzz', (scoreVal / highScore) - 1);
-				}, 3000 * (scoreVal / highScore));
-			}
-			playSound('rise');
-			return scoreContainer;
-		}
-
-		let soundPlayer = MRE.Actor.CreateEmpty(app.context, {actor: {name: 'sound', parentId: app.scene.id}});
-		const sounds: {[key: string]: MRE.Sound} = {
-				buzz: app.assets.createSound('buzz', {uri: app.baseUrl + '/sounds/ding.ogg'}),
-				correct: app.assets.createSound('correct', {uri: app.baseUrl + '/sounds/correct.ogg'}),
-				wrong: app.assets.createSound('wrong', {uri: app.baseUrl + '/sounds/wrong.ogg'}),
-				rise: app.assets.createSound('rise', {uri: app.baseUrl + '/sounds/rise.ogg'}),
-				ticktock: app.assets.createSound('tick', {uri: app.baseUrl + '/sounds/ticktock.ogg'}),
-				click: app.assets.createSound('click', {uri: app.baseUrl + '/sounds/click.ogg'})
-		};
-		function playSound(sound: string, pitch = 0) {
-			console.log(`Playing sound: ${sound}`);
-			soundPlayer.startSound(sounds[sound].id, {
-				volume: 0.2,
-				doppler: 0,
-				rolloffStartDistance: 20,
-				pitch: pitch
-			});
 		}
 
 		function shuffleArray(array: any[]) {
@@ -2255,6 +2174,16 @@ export default class AltQuiz {
 			result += line;
 			return {text: result.substring(1, result.length), lines: lines};
 		}
+	}
+
+	public playSound(sound: string, pitch = 0) {
+		console.log(`Playing sound: ${sound}`);
+		this.soundPlayer.startSound(this.sharedAssets.sounds[sound].id, {
+			volume: 0.2,
+			doppler: 0,
+			rolloffStartDistance: 20,
+			pitch: pitch
+		});
 	}
 
 	public async getCategories() {

@@ -206,13 +206,29 @@ export default class Menu {
 				transform: { local: { position: { y: -0.35, z: -0.001 } } }
 			}
 		});
-		joinButton.findChildrenByName('label', false)[0].transform.local.position.y = 0.04;
+
+		const joinLabel = joinButton.findChildrenByName('label', false)[0];
+		joinLabel.transform.local.position.y = 0.04;
+		joinLabel.appearance.enabledFor = new MRE.GroupMask(this.app.context, ['notJoined']);
+
+		const joinLabelDesc = joinLabel.toJSON();
+		const leaveLabel = MRE.Actor.Create(this.app.context, { actor: {
+			name: 'leaveLabel',
+			parentId: joinButton.id,
+			transform: { local: joinLabelDesc.transform.local },
+			text: {
+				...joinLabelDesc.text,
+				contents: 'Leave Game',
+				color: MRE.Color3.Red()
+			},
+			appearance: { enabled: new MRE.GroupMask(this.app.context, ['joined']) }
+		}});
 
 		const playerCountLabel = MRE.Actor.CreateEmpty(this.app.context, {
 			actor: {
 				name: 'playerCount',
 				parentId: joinButton.id,
-				transform: { local: { position: { y: -0.06, z: -0.005 } } },
+				transform: { local: { position: { y: -0.06, z: -0.008 } } },
 				text: {
 					contents: 'Players joined: 0',
 					anchor: MRE.TextAnchorLocation.MiddleCenter,
@@ -248,9 +264,15 @@ export default class Menu {
 			console.log('join');
 			const joined = this.app.playerManager.playerList.some(p => p.id === user.id);
 			if (!joined) {
+				user.groups.delete('notJoined');
+				user.groups.add('joined');
 				this.app.playerList.push(new Player(user.id, user.name));
-				playerCountLabel.text.contents = `Players joined: ${this.app.playerList.length}`;
+			} else {
+				user.groups.delete('joined');
+				user.groups.add('notJoined');
+				this.app.playerList.splice(this.app.playerList.findIndex(p => p.id === user.id), 1);
 			}
+			playerCountLabel.text.contents = `Players joined: ${this.app.playerList.length}`;
 		});
 
 		startButton.setBehavior(MRE.ButtonBehavior).onClick(user => {
