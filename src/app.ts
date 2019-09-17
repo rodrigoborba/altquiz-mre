@@ -176,7 +176,7 @@ export default class AltQuiz {
 								p.answered = true;
 								p.answer = i;
 								p.timeToAnswer = timeLeft;
-								p.icon.appearance.material = colors.yellow;
+								// p.icon.appearance.material = colors.yellow;
 								user.groups.clear();
 								user.groups.add(`answered${letters[i]}`);
 							}
@@ -302,10 +302,10 @@ export default class AltQuiz {
 									nextButton.setBehavior(MRE.ButtonBehavior).onButton('pressed', (user: MRE.User) => {
 										if (app.playerManager.isMod(user)) {
 											if (scores) scores.destroy();
-											for (const p of app.playerList) {
+											/* for (const p of app.playerList) {
 												p.icon.appearance.enabled = true;
 												p.icon.findChildrenByName('iconLabel', false)[0].text.enabled = true;
-											}
+											} */
 											let difficulty = 'easy';
 											let catList = app.categories.easy;
 											if (currentRound > 9) {
@@ -1845,7 +1845,7 @@ export default class AltQuiz {
 						p.answered = false;
 					}, 2000);
 					p.answer = null;
-					p.icon.appearance.material = colors.white;
+					// p.icon.appearance.material = colors.white;
 					if (app.context.user(p.id)) {
 						app.context.user(p.id).groups.clear();
 					}
@@ -1933,13 +1933,13 @@ export default class AltQuiz {
 						if (p.answer === correctAnswer) {
 							p.score += 100 + Math.round(p.timeToAnswer * 10);
 							console.log(`Correct. Bonus: ${Math.round(p.timeToAnswer * 10)}`);
-							p.icon.appearance.material = colors.green;
+							// p.icon.appearance.material = colors.green;
 							app.context.user(p.id).groups.clear();
 						} else {
 							p.score -= 100;
-							p.icon.appearance.material = colors.red;
+							// p.icon.appearance.material = colors.red;
 						}
-						const scoreText = MRE.Actor.CreateEmpty(app.context, {
+						/* const scoreText = MRE.Actor.CreateEmpty(app.context, {
 							actor: {
 								parentId: p.icon.id,
 								name: 'scoreText',
@@ -1955,7 +1955,7 @@ export default class AltQuiz {
 						});
 						setTimeout(() => {
 							scoreText.destroy();
-						}, 3000);
+						}, 3000); */
 					}
 				}
 			}
@@ -2055,9 +2055,9 @@ export default class AltQuiz {
 			} else if (app.gamemode === 'new') {
 				// mainScreen.destroy();
 				mainScreen.transform.local.scale.setAll(0.0001);
-				for (const p of app.playerList) {
+				/* for (const p of app.playerList) {
 					p.icon.appearance.material = colors.white;
-				}
+				} */
 				return newScoreScreen();
 			}
 		}
@@ -2110,8 +2110,8 @@ export default class AltQuiz {
 		function newScoreScreen() {
 			let highScore = 1;
 			for (const p of app.playerList) {
-				p.icon.appearance.enabled = false;
-				p.icon.findChildrenByName('iconLabel', false)[0].text.enabled = false;
+				// p.icon.appearance.enabled = false;
+				// p.icon.findChildrenByName('iconLabel', false)[0].text.enabled = false;
 				if (p.score > highScore) {
 					highScore = p.score;
 				}
@@ -2125,7 +2125,8 @@ export default class AltQuiz {
 					transform: { local: { position: { x: -1.8, y: 1.32, z: -0.001 } } }
 				}
 			});
-			const containerWidth = 3.6, containerHeight = 1.62;
+			const containerWidth = 3.6;
+			const containerHeight = 1.62;
 
 			for (let i = 0; i < app.playerList.length; i++) {
 				const p = app.playerList[i];
@@ -2168,7 +2169,7 @@ export default class AltQuiz {
 				}}}, 3 * (scoreVal / highScore), MRE.AnimationEaseCurves.Linear);
 
 				setTimeout(() => {
-					label.text.contents += ` - ${p.score}`
+					label.text.contents += `    ${p.score}`;
 					playSound(scoreVal === highScore ? 'correct' : 'buzz', (scoreVal / highScore) - 1);
 				}, 3000 * (scoreVal / highScore));
 			}

@@ -248,10 +248,7 @@ export default class Menu {
 			console.log('join');
 			const joined = this.app.playerManager.playerList.some(p => p.id === user.id);
 			if (!joined) {
-				const color = this.randomColor();
-				const icon = this.createPlayerIcon(user.name, user.id, color);
-				this.app.playerList.push(new Player(user.id, user.name, icon, color));
-
+				this.app.playerList.push(new Player(user.id, user.name));
 				playerCountLabel.text.contents = `Players joined: ${this.app.playerList.length}`;
 			}
 		});
