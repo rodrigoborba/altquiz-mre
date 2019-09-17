@@ -302,7 +302,7 @@ export default class AltQuiz {
 											transform: { local: { position: { x: 0.76, y: 1.15, z: -0.001 } } }
 										}
 									});
-									nextButton.setBehavior(MRE.ButtonBehavior).onButton('pressed', (user: MRE.User) => {
+									nextButton.setBehavior(MRE.ButtonBehavior).onClick(user => {
 										if (app.playerManager.isMod(user)) {
 											if (scores) scores.destroy();
 											/* for (const p of app.playerList) {
@@ -336,7 +336,7 @@ export default class AltQuiz {
 									}
 								});
 								let endClicked = false;
-								endButton.setBehavior(MRE.ButtonBehavior).onButton('pressed', (user: MRE.User) => {
+								endButton.setBehavior(MRE.ButtonBehavior).onClick(user => {
 									if (app.playerManager.isMod(user)) {
 										if (!endClicked) {
 											if (scores) scores.destroy();
