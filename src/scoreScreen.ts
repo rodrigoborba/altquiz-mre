@@ -65,15 +65,15 @@ export default class ScoreScreen {
 						meshId: mesh.id,
 						materialId: this.assets.createMaterial('scoreBar', {
 							color: {
-								r: Math.max(0, 1 - 2 * (scoreVal / highScore)),
-								g: Math.max(0, -1 + 2 * (scoreVal / highScore)),
+								r: Math.min(1, 2 - 2 * (scoreVal / highScore)),
+								g: Math.min(1, 0 + 2 * (scoreVal / highScore)),
 								b: 0
 							}
 						}).id
 					}
 				}
 			});
-			const maxBarLength = containerWidth / 2 - 0.1;
+			const maxBarLength = containerWidth / 2 - 0.2;
 			bar.animateTo({transform: {local: {
 				position: {x: bar.transform.local.position.x + (maxBarLength * (scoreVal / highScore)) / 2 },
 				scale: {x: maxBarLength * (scoreVal / highScore)}
