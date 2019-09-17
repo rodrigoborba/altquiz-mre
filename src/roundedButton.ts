@@ -5,14 +5,22 @@
 import * as MRE from '@microsoft/mixed-reality-extension-sdk';
 
 export default function createRoundedButton(container: MRE.AssetContainer, options: {
-	width?: number,
-	height?: number,
-	borderThickness: number,
-	radius: number,
-	textSize: number,
+	width: number,
+	height: number,
+	borderThickness?: number,
+	radius?: number,
+	textSize?: number,
 	text: string,
 	actor?: Partial<MRE.ActorLike>
 }): MRE.Actor {
+	options = {
+		width: 1.4,
+		height: 0.3,
+		borderThickness: 0.015,
+		radius: 0.08,
+		textSize: 0.1,
+		...options
+	};
 
 	const root = MRE.Actor.Create(container.context, {
 		actor: {

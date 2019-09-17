@@ -285,29 +285,26 @@ export default class AltQuiz {
 								time(10, 'reveal');
 							}, 2000);
 						} else if (next === 'scores') {
-							showScores();
+							const scores = showScores();
 							setTimeout(() => {
 								let nextButton: MRE.Actor;
 								if (app.categories.hard.length > 0) {
 									nextButton = createRoundedButton(app.assets, {
-										width: 0.8,
-										height: 0.3,
-										borderThickness: 0.015,
-										radius: 0.08,
-										textSize: 0.1,
+										width: 1.4,
+										height: 0.2,
 										text: 'Next Round',
 										actor: {
 											name: 'nextRound',
 											parentId: app.scene.id,
-											transform: { local: { position: { x: 1.43, y: 2.435, z: -0.001 } } }
+											transform: { local: { position: { x: 0.76, y: 1.15, z: -0.001 } } }
 										}
 									});
 									nextButton.setBehavior(MRE.ButtonBehavior).onButton('pressed', (user: MRE.User) => {
 										if (app.playerManager.isMod(user)) {
+											if (scores) scores.destroy();
 											for (const p of app.playerList) {
-												p.icon.findChildrenByName('scoreBar', true)[0].destroy();
-												p.icon.findChildrenByName('scoreText', true)[0].destroy();
-												p.icon.findChildrenByName('nameText', true)[0].destroy();
+												p.icon.appearance.enabled = true;
+												p.icon.findChildrenByName('iconLabel', false)[0].text.enabled = true;
 											}
 											let difficulty = 'easy';
 											let catList = app.categories.easy;
@@ -326,27 +323,20 @@ export default class AltQuiz {
 								}
 
 								const endButton = createRoundedButton(app.assets, {
-									width: 0.8,
-									height: 0.3,
-									borderThickness: 0.015,
-									radius: 0.08,
-									textSize: 0.1,
+									width: 1.4,
+									height: 0.2,
 									text: 'End Game',
 									actor: {
 										name: 'endGame',
 										parentId: app.scene.id,
-										transform: { local: { position: { x: 1.43, y: 2.8, z: -0.001 } } }
+										transform: { local: { position: { x: -0.76, y: 1.15, z: -0.001 } } }
 									}
 								});
 								let endClicked = false;
 								endButton.setBehavior(MRE.ButtonBehavior).onButton('pressed', (user: MRE.User) => {
 									if (app.playerManager.isMod(user)) {
 										if (!endClicked) {
-											for (const p of app.playerList) {
-												p.icon.findChildrenByName('scoreBar', true)[0].destroy();
-												p.icon.findChildrenByName('scoreText', true)[0].destroy();
-												p.icon.findChildrenByName('nameText', true)[0].destroy();
-											}
+											if (scores) scores.destroy();
 											let winner = app.playerList[0];
 											for (const p of app.playerList) {
 												if (p.score > winner.score) {
@@ -2068,7 +2058,7 @@ export default class AltQuiz {
 				for (const p of app.playerList) {
 					p.icon.appearance.material = colors.white;
 				}
-				newScoreScreen();
+				return newScoreScreen();
 			}
 		}
 		function hideScores() {
@@ -2118,70 +2108,72 @@ export default class AltQuiz {
 			}
 		}
 		function newScoreScreen() {
-			let highScore = 0;
+			let highScore = 1;
 			for (const p of app.playerList) {
+				p.icon.appearance.enabled = false;
+				p.icon.findChildrenByName('iconLabel', false)[0].text.enabled = false;
 				if (p.score > highScore) {
 					highScore = p.score;
 				}
 			}
-			for (const p of app.playerList) {
+
+			const mesh = new MRE.AssetContainer(app.context).createBoxMesh('scoreBar', 1, 0.04, 0.001);
+			const scoreContainer = MRE.Actor.Create(app.context, {
+				actor: {
+					name: 'scoreContainer',
+					parentId: app.scene.id,
+					transform: { local: { position: { x: -1.8, y: 1.32, z: -0.001 } } }
+				}
+			});
+			const containerWidth = 3.6, containerHeight = 1.62;
+
+			for (let i = 0; i < app.playerList.length; i++) {
+				const p = app.playerList[i];
 				const scoreVal = p.score > 0 ? p.score : 1;
-				const bar = MRE.Actor.CreatePrimitive(new MRE.AssetContainer(app.context), {
-					definition: {
-						shape: MRE.PrimitiveShape.Box,
-						dimensions: {x: 0.1, y: 1, z: 0.001}
-					},
+				const label = MRE.Actor.CreateEmpty(app.context, {
 					actor: {
-						parentId: p.icon.id,
-						name: 'scoreBar',
-						transform: {local: {
-							position: {y: 0.1},
-							scale: {y: 0}
-						}},
-						appearance: {
-							materialId: p.icon.findChildrenByName('iconInner', true)[0].appearance.materialId
+						parentId: scoreContainer.id,
+						name: 'scoreText',
+						transform: { local: { position: {
+							x: (i % 2) * containerWidth / 2,
+							y: containerHeight - Math.floor(i / 2) * (containerHeight / 10)
+						} } },
+						text: {
+							contents: p.name,
+							height: 0.075,
+							anchor: MRE.TextAnchorLocation.TopLeft,
+							// color: p.color
 						}
 					}
 				});
+
+				const bar = MRE.Actor.Create(app.context, {
+					actor: {
+						parentId: label.id,
+						name: 'scoreBar',
+						transform: { local: {
+							position: { y: -0.13 },
+							scale: { x: 0 }
+						}},
+						appearance: {
+							meshId: mesh.id,
+							// materialId: p.icon.findChildrenByName('iconInner', true)[0].appearance.materialId
+						}
+					}
+				});
+				const maxBarLength = containerWidth / 2 - 0.1;
 				bar.animateTo({transform: {local: {
-					position: {y: 0.1 + (0.8 * (scoreVal / highScore))},
-					scale: {y: 1.6 * (scoreVal / highScore)}
+					position: {x: bar.transform.local.position.x + (maxBarLength * (scoreVal / highScore)) / 2 },
+					scale: {x: maxBarLength * (scoreVal / highScore)}
 				}}}, 3 * (scoreVal / highScore), MRE.AnimationEaseCurves.Linear);
+
 				setTimeout(() => {
-					MRE.Actor.CreateEmpty(app.context, {
-						actor: {
-							parentId: p.icon.id,
-							name: 'scoreText',
-							transform: {local: {
-								position: {y: 1.6 * (scoreVal / highScore) + 0.175}
-							}},
-							text: {
-								contents: p.score.toString(),
-								height: 0.15,
-								anchor: MRE.TextAnchorLocation.MiddleCenter,
-								color: p.color
-							}
-						}
-					});
-					MRE.Actor.CreateEmpty(app.context, {
-						actor: {
-							parentId: p.icon.id,
-							name: 'nameText',
-							transform: {local: {
-								position: {y: 1.6 * (scoreVal / highScore) + 0.275}
-							}},
-							text: {
-								contents: p.name,
-								height: 0.075,
-								anchor: MRE.TextAnchorLocation.MiddleCenter,
-								color: p.color
-							}
-						}
-					});
+					label.text.contents += ` - ${p.score}`
 					playSound(scoreVal === highScore ? 'correct' : 'buzz', (scoreVal / highScore) - 1);
 				}, 3000 * (scoreVal / highScore));
 			}
 			playSound('rise');
+			return scoreContainer;
 		}
 
 		let soundPlayer = MRE.Actor.CreateEmpty(app.context, {actor: {name: 'sound', parentId: app.scene.id}});

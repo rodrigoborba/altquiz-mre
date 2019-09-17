@@ -40,7 +40,7 @@ export default class Screen {
 					range: 4
 				}
 			}
-		})
+		});
 	}
 
 	public setBorderColor(color: MRE.Color4) {

@@ -199,9 +199,6 @@ export default class Menu {
 		const joinButton = createRoundedButton(this.assets, {
 			width: 1.4,
 			height: 0.3,
-			borderThickness: 0.015,
-			radius: 0.08,
-			textSize: 0.1,
 			text: 'Join Game',
 			actor: {
 				name: 'joinButton',
@@ -227,9 +224,6 @@ export default class Menu {
 		const startButton = createRoundedButton(this.assets, {
 			width: 1.4,
 			height: 0.3,
-			borderThickness: 0.015,
-			radius: 0.08,
-			textSize: 0.1,
 			text: 'Start Game',
 			actor: {
 				name: 'startGame',
@@ -302,6 +296,7 @@ export default class Menu {
 				parentId: this.playerIconRoot.id,
 				transform: { local: { position: { x: this.app.playerList.length * offset, z: -0.01 } } },
 				appearance: {
+					enabled: false,
 					meshId: this.iconOuter.id,
 					materialId: this.app.colors.white.id
 				},
@@ -314,6 +309,7 @@ export default class Menu {
 				parentId: iconBase.id,
 				transform: { local: { position: { z: -0.001 } } },
 				appearance: {
+					enabled: false,
 					meshId: this.iconInner.id,
 					materialId: this.app.assets.createMaterial('playerColor', {color: color}).id
 				}
@@ -325,6 +321,7 @@ export default class Menu {
 				parentId: iconBase.id,
 				transform: { local: { position: { z: -0.002 } } },
 				text: {
+					enabled: false,
 					contents: name.substr(0, 1),
 					height: 0.075,
 					anchor: MRE.TextAnchorLocation.MiddleCenter,
@@ -335,7 +332,7 @@ export default class Menu {
 
 		// set up hover label
 		const hoverLabels: {[id: string]: MRE.Actor} = {};
-		const iconHover = iconBase.setBehavior(MRE.ButtonBehavior);
+		/* const iconHover = iconBase.setBehavior(MRE.ButtonBehavior);
 		iconHover.onHover('enter', user => {
 			if (hoverLabels[user.id] === undefined) {
 				hoverLabels[user.id] = MRE.Actor.CreateEmpty(this.app.context, {
@@ -370,14 +367,14 @@ export default class Menu {
 					}
 				}
 			}
-		});
+		}); */
 
 		return iconBase;
 	}
 
 	private randomColor(): MRE.Color3 {
 		// HSL 0-360, 75-100, 20-40
-		const rand = convert.hsl.rgb([Math.random() * 360, Math.random() * 25 + 50, Math.random() * 20 + 20]).map(x => x / 255);
+		const rand = convert.hsl.rgb([Math.random() * 360, Math.random() * 25 + 50, Math.random() * 20 + 40]).map(x => x / 255);
 		return new MRE.Color3(rand[0], rand[1], rand[2]);
 	}
 
