@@ -9,7 +9,7 @@ import { Player } from './player';
 
 export default class PlayerManager {
 	public connectedUsers: MRE.User[] = [];
-	public currentMod: string;
+	public currentMod: MRE.Guid;
 	public playerList: Player[] = [];
 
 	private assets: MRE.AssetContainer;
@@ -69,7 +69,7 @@ export default class PlayerManager {
 		}
 	}
 
-	private createModPopup(userId: string) {
+	private createModPopup(userId: MRE.Guid) {
 		const prompt = MRE.Actor.CreatePrimitive(this.assets, {
 			definition: {
 				shape: MRE.PrimitiveShape.Box,

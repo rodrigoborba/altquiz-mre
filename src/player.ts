@@ -5,7 +5,7 @@
 import * as MRE from '@microsoft/mixed-reality-extension-sdk';
 
 export interface PlayerLike {
-	id: string;
+	id: MRE.Guid;
 	name: string;
 	score: number;
 	answered: boolean;
@@ -15,7 +15,7 @@ export interface PlayerLike {
 }
 
 export class Player implements PlayerLike {
-	public id: string;
+	public id: MRE.Guid;
 	public name: string;
 	public score = 0;
 	public answered = false;
@@ -24,7 +24,7 @@ export class Player implements PlayerLike {
 	public screen: MRE.Actor;
 	public color: MRE.Color3;
 
-	public constructor(id: string, name: string) {
+	public constructor(id: MRE.Guid, name: string) {
 		this.id = id;
 		this.name = name;
 	}

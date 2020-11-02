@@ -3,3 +3,4 @@ built
 npm-debug.log
 .DS_Store
 /*.env
+*.tsbuildinfo

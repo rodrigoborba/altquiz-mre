@@ -319,7 +319,7 @@ export default class Menu {
 					meshId: this.iconOuter.id,
 					materialId: this.app.colors.white.id
 				},
-				collider: { geometry: { shape: 'auto' } }
+				collider: { geometry: { shape: MRE.ColliderType.Auto } }
 			}
 		});
 		const inner = MRE.Actor.Create(this.app.context, {

@@ -1,0 +1,5 @@
+{
+    "name": "AltQuiz",
+    "author": "Ben Garfield",
+    "optionalPermissions": ["user-interaction"]
+}

@@ -28,7 +28,7 @@ export default function createRoundedButton(container: MRE.AssetContainer, optio
 			...options.actor,
 			collider: {
 				geometry: {
-					shape: 'box',
+					shape: MRE.ColliderType.Box,
 					size: {
 						x: Math.max(options.width, options.radius),
 						y: Math.max(options.height, options.radius),

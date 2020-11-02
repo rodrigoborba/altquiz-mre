@@ -543,7 +543,7 @@ export default class AltQuiz {
 			app.getCategories().catch();
 		}
 
-		function giveCrown(userId: string) {
+		function giveCrown(userId: MRE.Guid) {
 			const crownC = MRE.Actor.CreateEmpty(app.context, {
 				actor: {
 					name: 'crown',
@@ -565,40 +565,31 @@ export default class AltQuiz {
 					}}
 				}
 			});
-			crown.createAnimation('spin', {
+
+			const spinData = crownModel.createAnimationData("spin", { tracks: [{
+				target: MRE.ActorPath("crown").transform.local.rotation,
 				keyframes: [{
 					time: 0,
-					value: {transform: {local: {rotation: MRE.Quaternion.RotationAxis(MRE.Vector3.Up(), 0)}}}
+					value: MRE.Quaternion.RotationAxis(MRE.Vector3.Up(), 0)
 				}, {
 					time: 0.5,
-					value: {transform: {local: {rotation: MRE.Quaternion.RotationAxis(MRE.Vector3.Up(), 180 * MRE.DegreesToRadians)}}}
+					value: MRE.Quaternion.RotationAxis(MRE.Vector3.Up(), 180 * MRE.DegreesToRadians)
 				}, {
 					time: 1,
-					value: {transform: {local: {rotation: MRE.Quaternion.RotationAxis(MRE.Vector3.Up(), 360 * MRE.DegreesToRadians)}}}
-				}],
-				wrapMode: MRE.AnimationWrapMode.Loop,
-				initialState: {
-					enabled: true,
-					speed: 0.025
-				}
-			});
-			crown.createAnimation('hover', {
-				keyframes: [{
-					time: 0,
-					value: {transform: {local: {position: {y: 0}}}}
-				}, {
-					time: 0.5,
-					value: {transform: {local: {position: {y: 0.025}}}}
-				}, {
-					time: 1,
-					value: {transform: {local: {position: {y: 0.05}}}}
-				}],
-				wrapMode: MRE.AnimationWrapMode.PingPong,
-				initialState: {
-					enabled: true,
-					speed: 0.1
-				}
-			});
+					value: MRE.Quaternion.RotationAxis(MRE.Vector3.Up(), 360 * MRE.DegreesToRadians)
+				}]
+			}]});
+			spinData.bind({ crown }, { isPlaying: true, speed: 0.025, wrapMode: MRE.AnimationWrapMode.Loop });
+
+			const hoverData = crownModel.createAnimationData("hover", { tracks: [{
+				target: MRE.ActorPath("crown").transform.local.position.y,
+				keyframes: [
+					{ time: 0, value: 0 },
+					{ time: 0.5, value: 0.025 },
+					{ time: 1, value: 0.05 }
+				]
+			}]});
+			hoverData.bind({ crown }, { isPlaying: true, speed: 0.1, wrapMode: MRE.AnimationWrapMode.PingPong });
 		}
 
 		function assignMat(actor: MRE.Actor, mat: MRE.Material) {
@@ -611,7 +602,7 @@ export default class AltQuiz {
 			}
 			actor.children.forEach(c => assignColor(c, color));
 		}
-		function checkIfJoined(list: any, id: string) {
+		function checkIfJoined(list: any, id: MRE.Guid) {
 			let bool = false;
 			for (let i = 0; i < 5; i++) {
 				if (list[i].id === id) {

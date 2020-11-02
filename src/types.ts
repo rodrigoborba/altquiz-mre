@@ -2,10 +2,10 @@
  * Copyright (c) Ben Garfield. All rights reserved.
  * Licensed under the MIT License.
  */
-import { Actor } from '@microsoft/mixed-reality-extension-sdk';
+import { Actor, Guid } from '@microsoft/mixed-reality-extension-sdk';
 
 export interface Podium {
-	id: string;
+	id: Guid;
 	name: Actor;
 	score: Actor;
 	scoreVal: number;
