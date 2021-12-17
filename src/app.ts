@@ -188,7 +188,7 @@ export default class AltQuiz {
 				});
 			}
 
-			const numOfQs = 5;
+			const numOfQs = 25;
 
 			const timeText = MRE.Actor.CreateEmpty(app.context, {
 				actor: {
