@@ -229,7 +229,7 @@ export default class AltQuiz {
 							loadedQuestions.rows[i].question = `${i + 1}: ${loadedQuestions.rows[i].question}`;
 						}
 						app.removeCategory(catList[count].id);
-						time(25, 'start');
+						time(5, 'start');
 					} else {
 						if (count === app.categories.easy.length - 1) {
 							count = -1;
@@ -242,7 +242,7 @@ export default class AltQuiz {
 				setTimeout(tick, clickTime);
 			}
 			function time(count: number, next: string) {
-				console('time ' + count + ' next ' + next)
+				// console('time ' + count + ' next ' + next);
 				if (next === 'reveal') {
 					setTimeout(() => {
 						app.playSound('ticktock');
