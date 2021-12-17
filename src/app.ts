@@ -227,7 +227,7 @@ export default class AltQuiz {
 							loadedQuestions.rows[i].question = `${i + 1}: ${loadedQuestions.rows[i].question}`;
 						}
 						app.removeCategory(catList[count].id);
-						time(5, 'start');
+						time(25, 'start');
 					} else {
 						if (count === app.categories.easy.length - 1) {
 							count = -1;
