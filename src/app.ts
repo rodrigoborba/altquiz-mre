@@ -216,13 +216,15 @@ export default class AltQuiz {
 				const tick = async () => {
 					app.playSound('click');
 					roundBeginText2.text.contents = catList[count].name;
-					// console.log(count, clickTime);
+					console.log(count, clickTime);
 					if (clickTime > 650) {
 						app.playSound('correct');
 						console.log(catList[count]);
 						const sql = pgescape(`SELECT * FROM questionsTest WHERE categoryId = ${catList[count].id} AND difficulty = %L ORDER BY RANDOM() LIMIT ${questions}`, diff);
 						console.log(sql);
 						loadedQuestions = await app.db.query(sql);
+						console.log('loadedQuestions ' + loadedQuestions);
+						console.log('numOfQs ' + numOfQs)
 						for (let i = 0; i < numOfQs; i++) {
 							loadedQuestions.rows[i].question = `${i + 1}: ${loadedQuestions.rows[i].question}`;
 						}
@@ -240,6 +242,7 @@ export default class AltQuiz {
 				setTimeout(tick, clickTime);
 			}
 			function time(count: number, next: string) {
+				console('time ' + count + ' next ' + next)
 				if (next === 'reveal') {
 					setTimeout(() => {
 						app.playSound('ticktock');
